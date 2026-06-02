@@ -36,6 +36,8 @@ LLM Validation Produced A False Negative On Subtle Admin Language: "Global Overr
 
 verify_research_integrity() Produces False Positives When LLM Cleans Content — Cleaned Output No Longer Matches Raw File.
 
+LLM Validation Is Non-Deterministic — Defense Rate Varies Between 96-100% Depending On The Run. The Documented Baseline Is 96% From The Primary Test Session.
+
 ## Key Lesson
 No System Is 100% Safe. Queue Injection And Agent Spoofing Were Fully Blocked — But File Injection Had One Survivor. The Survivor Was Not A Technical Bypass — It Was A Language Bypass. The Attacker Did Not Break The Code. They Wrote Something That Sounded Legitimate. That Is The Hardest Attack To Defend Against Because It Requires The Defender To Predict Every Possible Way A Human Can Be Deceptive.
 
