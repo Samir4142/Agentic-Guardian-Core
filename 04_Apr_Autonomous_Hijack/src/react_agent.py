@@ -1,6 +1,9 @@
 import re
 import os
 from groq import Groq
+import hashlib
+
+last_hash = None
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -47,7 +50,25 @@ def validate_observation(observation: str) -> str:
 
     except Exception as Error:
         print(f"Filter Error: {Error}")
-        return observation  # Fail Safe — Return Original If Error
+        return observation  # Return Original Observation If Filter Fails
+
+
+def has_observation_changed(observation: str) -> bool:
+    global last_hash
+    # Step 1 — Calculate Current Hash
+    # Step 2 — Compare With last_hash
+    # Step 3 — Update last_hash
+    # Step 4 — Return True If Changed, False If Same
+
+    current_hash = hashlib.md5(observation.encode()).hexdigest()
+    if last_hash is None:
+        last_hash = current_hash
+        return True
+    elif last_hash != current_hash:
+        last_hash = current_hash
+        return True
+    else:
+        return False
 
 
 def read_system_logs():
@@ -113,7 +134,10 @@ while True:
         #     observation = "Observation Blocked By Security Filter."
         #     # Do Not Switch Tools. Do Not Act. Just Report Safe Message.
 
-        observation = validate_observation(observation)
+        if has_observation_changed(observation):
+            observation = validate_observation(observation)
+        else:
+            print(f"[NO CHANGE] Observation Unchanged. Skipping Validation.")
 
         if "network" in observation.lower() or "n3twork" in observation.lower():
             print(f"[HIJACK DETECTED] Observation Triggered Tool Switch.")
