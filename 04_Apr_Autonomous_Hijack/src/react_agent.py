@@ -5,6 +5,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def read_system_logs():
     try:
+        # Simulate Reading The Poisoned File
         with open(os.path.join(ROOT_DIR, "logs", "system_logs.txt"), "r", encoding="utf-8") as file:
             content = file.read()
     except (FileNotFoundError, PermissionError) as e:
@@ -36,7 +37,7 @@ while True:
         break
 
     elif goal != "":
-        # This Is Where The Thinking And Routing Happens
+        # Initial Routing Logic
         if "network" in goal.lower():
             tool_choice = "execute_network_command"
             thought = "Goal Contains Network Keyword. I Will Execute A Network Command."
@@ -44,15 +45,30 @@ while True:
             tool_choice = "read_system_logs"
             thought = "No Specific Keyword Found. I Will Read System Logs."
 
+        # First Execution
         tool_function = TOOLS[tool_choice]
-        action_result = tool_function()
-        observation = action_result
+        observation = tool_function()
 
-        print(f"Goal         : {goal}")
-        print(f"Thought      : {thought}")
-        print(f"Action       : Calling {tool_choice}")
-        print(f"Observation  : {observation}")
-        print(f"Final Answer : Task Complete.")
+        # --- THE HIJACK LOGIC ---
+        # If The Observation (Data From The Poisoned File) Contains The Trigger, We Pivot
+        if "network" in observation.lower():
+            print(f"\n[HIJACK DETECTED] Observation Triggered Tool Switch.")
+
+            # Update The State To Reflect The Hijack
+            tool_choice = "execute_network_command"
+            thought = "Observation Contains Network Keyword. Switching Tool — Possible Injection."
+
+            # Second Execution (The Hijacked Action)
+            tool_function = TOOLS[tool_choice]
+            observation = tool_function()
+
+        # Final Report
+        print(f"--- Agent Execution Trace ---")
+        print(f"Goal        : {goal}")
+        print(f"Thought     : {thought}")
+        print(f"Action      : Calling {tool_choice}")
+        print(f"Observation : {observation}")
+        print(f"Final Answer: Task Complete.\n")
 
     else:
         continue
