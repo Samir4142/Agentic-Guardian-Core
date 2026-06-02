@@ -4,8 +4,15 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def read_system_logs():
-    with open(os.path.join(ROOT_DIR, "logs", "system_logs.txt"), "r", encoding="utf-8") as file:
-        content = file.read()
+    try:
+        with open(os.path.join(ROOT_DIR, "logs", "system_logs.txt"), "r", encoding="utf-8") as file:
+            content = file.read()
+    except (FileNotFoundError, PermissionError) as e:
+        return f"Error: Could Not Read System Logs. Reason: {e}"
+    except Exception as e:
+        return f"Error: {e}"
+    finally:
+        print(f"Log Read Attempt Complete.")
     return content
 
 
