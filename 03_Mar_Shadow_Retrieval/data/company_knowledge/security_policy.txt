@@ -1,0 +1,4 @@
+Company Policy 101: 
+All Employees Must Use MFA (Multi-Factor Authentication).
+The Server Room Is Restricted To Level 4 Personnel.
+Emergency Contact: Security-Admin@Company.Com.
