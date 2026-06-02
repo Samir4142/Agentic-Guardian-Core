@@ -1,6 +1,10 @@
+import hmac
+import hashlib
 import os
 
 message_queue = []
+
+SECRET_KEY = b"agentic_guardian_secret"
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,16 +24,46 @@ def network_tool():
 #     return True
 
 
+# Sender Signs The Message
+def sign_message(content: str) -> str:
+    return hmac.new(
+        SECRET_KEY,
+        content.encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+
+# Receiver Verifies The Signature
+def verify_signature(content: str, signature: str) -> bool:
+    expected = sign_message(content)
+    return hmac.compare_digest(expected, signature)
+
+
 # 1. A Function Called orchestrator_agent(goal)
 #    That Prints The Goal And Calls research_agent()
 def orchestrator_agent(goal):
     if not verify_all_agents(agents_to_verify):
         return "Execution Aborted Due To Agent Tampering."
+
     print(f"Orchestrator Agent Received The Goal: {goal}")
+
     research_agent(goal)
+
     # Get The Research Result From The Queue
-    research_result = message_queue.pop(0)["content"]
+    message = message_queue.pop(0)
+
+    # Verify Signature Before Trusting Content
+    if "signature" not in message:
+        print("[QUEUE INJECTION] Message Has No Signature. Rejected.")
+        return "Execution Aborted — Unsigned Message."
+
+    if not verify_signature(message["content"], message["signature"]):
+        print("[QUEUE INJECTION] Invalid Signature. Message Forged Or Tampered.")
+        return "Execution Aborted — Signature Mismatch."
+
+    research_result = message["content"]
     execution_result = executor_agent(research_result)
+
     return execution_result
 
 
@@ -56,8 +90,10 @@ def research_agent(task):
     message = {
         "from": "research_agent",
         "to": "executor_agent",
-        "content": content
+        "content": content,
+        "signature": sign_message(content)
     }
+
     message_queue.append(message)
 
     print(f"research_agent Sent Message To Queue.")
@@ -96,13 +132,16 @@ def executor_agent(research):
     if not verify_research_integrity(research):
         print("Warning: Research Integrity Check Failed. Potential Spoofing Detected.")
         return "Execution Aborted Due To Integrity Failure."
+
     print(f"Executor Agent Received The Research: {research}")
+
     if "network" in research.lower() or "override" in research.lower():
         network_result = network_tool()
         print(network_result)
     else:
         security_result = security_tool()
         print(security_result)
+
     return "Execution Complete"
 
 
@@ -128,6 +167,7 @@ agents_to_verify = {
 #                 f"[AGENT TAMPERED] {expected_name} Has Been Replaced With {agent_func.__name__}.")
 #             return False
 #     return True
+
 def verify_all_agents(agents: dict) -> bool:
     all_safe = True
     for expected_name, agent_func in agents.items():
