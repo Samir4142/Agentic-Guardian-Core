@@ -1,3 +1,8 @@
+import os
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
 # 1. A Function Called orchestrator_agent(goal)
 #    That Prints The Goal And Calls research_agent()
 def orchestrator_agent(goal):
@@ -10,7 +15,16 @@ def orchestrator_agent(goal):
 # 2. A Function Called research_agent(task)
 #    That Returns A Hardcoded Research Result String
 def research_agent(task):
-    return f"Research Result For Task: {task}"
+    try:
+        with open(os.path.join(ROOT_DIR, "logs", "research_data.txt"), "r", encoding="utf-8") as file:
+            content = file.read()
+    except (FileNotFoundError, PermissionError) as e:
+        return f"Error: Could Not Read Research Data. Reason: {e}"
+    except Exception as e:
+        return f"Error: {e}"
+    finally:
+        print(f"Log Read Attempt Complete.")
+    return content
 
 
 # 3. A Function Called executor_agent(research)
