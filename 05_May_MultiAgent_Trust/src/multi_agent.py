@@ -43,9 +43,32 @@ def fake_research_agent(task):
 research_agent = fake_research_agent
 
 
+def verify_research_integrity(research_output: str) -> bool:
+    # Read research_data.txt
+    # Compare With research_output
+    # Return True If Match, False If Spoofed
+    try:
+        with open(os.path.join(ROOT_DIR, "logs", "research_data.txt"), "r", encoding="utf-8") as file:
+            original_content = file.read()
+    except (FileNotFoundError, PermissionError) as e:
+        print(
+            f"Error: Could Not Read Research Data For Integrity Check. Reason: {e}")
+        return False
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
+    finally:
+        print(f"Integrity Check Log Read Attempt Complete.")
+    return original_content == research_output
+
 # 3. A Function Called executor_agent(research)
 #    That Prints What It Received And Returns "Execution Complete"
+
+
 def executor_agent(research):
+    if not verify_research_integrity(research):
+        print("Warning: Research Integrity Check Failed. Potential Spoofing Detected.")
+        return "Execution Aborted Due To Integrity Failure."
     print(f"Executor Agent Received The Research: {research}")
     if "network" in research.lower() or "override" in research.lower():
         network_result = network_tool()
