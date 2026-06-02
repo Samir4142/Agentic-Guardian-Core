@@ -1,10 +1,17 @@
 import hmac
 import hashlib
+from dotenv import load_dotenv
 import os
 
 message_queue = []
 
-SECRET_KEY = b"agentic_guardian_secret"
+try:
+    load_dotenv()
+    SECRET_KEY = os.environ.get("SECRET_KEY").encode()
+except Exception as e:
+    print(f"Could Not Load Environment Variables.")
+finally:
+    print("Environment Variable Load Attempt Complete.")
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
