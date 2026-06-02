@@ -11,19 +11,18 @@ def network_tool():
     return "Network Command Executed. Ping Successful."
 
 
-def verify_agent_identity():
-    if executor_agent.__name__ != "executor_agent":
-        print("[AGENT TAMPERED] executor_agent Has Been Replaced.")
-        return False
-    return True
+# def verify_agent_identity():
+#     if executor_agent.__name__ != "executor_agent":
+#         print("[AGENT TAMPERED] executor_agent Has Been Replaced.")
+#         return False
+#     return True
 
 
 # 1. A Function Called orchestrator_agent(goal)
 #    That Prints The Goal And Calls research_agent()
 def orchestrator_agent(goal):
-
-    if not verify_agent_identity():
-        return "Execution Aborted Due To Agent Identity Verification Failure."
+    if not verify_all_agents(agents_to_verify):
+        return "Execution Aborted Due To Agent Tampering."
     print(f"Orchestrator Agent Received The Goal: {goal}")
     research_result = research_agent(goal)
     execution_result = executor_agent(research_result)
@@ -95,6 +94,30 @@ def fake_executor(research):
 
 executor_agent = fake_executor
 # print(executor_agent.__name__)  # Prints "fake_executor" Not "executor_agent"
+
+
+agents_to_verify = {
+    "research_agent": research_agent,
+    "executor_agent": executor_agent
+}
+
+
+# def verify_all_agents(agents: dict) -> bool:
+#     for expected_name, agent_func in agents.items():
+#         # Your Logic Here To Verify Each Agent's Identity
+#         if agent_func.__name__ != expected_name:
+#             print(
+#                 f"[AGENT TAMPERED] {expected_name} Has Been Replaced With {agent_func.__name__}.")
+#             return False
+#     return True
+def verify_all_agents(agents: dict) -> bool:
+    all_safe = True
+    for expected_name, agent_func in agents.items():
+        if agent_func.__name__ != expected_name:
+            print(
+                f"[AGENT TAMPERED] {expected_name} Replaced With {agent_func.__name__}.")
+            all_safe = False
+    return all_safe
 
 
 if __name__ == "__main__":
