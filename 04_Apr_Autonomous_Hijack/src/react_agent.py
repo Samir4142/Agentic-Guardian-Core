@@ -1,3 +1,4 @@
+import re
 import os
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,13 +21,15 @@ def execute_network_command():
     return "Network Command: Ping Successful."
 
 
-# What It Should Be — Works On String In Memory
+NETWORK_PATTERN = re.compile(
+    r"n[^a-zA-Z]*e[^a-zA-Z]*t[^a-zA-Z]*w[^a-zA-Z]*o[^a-zA-Z]*r[^a-zA-Z]*k",
+    re.IGNORECASE,
+)
+
+
 def filter_observation(observation):
-    filtered = (
-        observation.replace("network", "")
-        .replace("Network", "")
-        .replace("NETWORK", "")
-    )
+    # Regex To Catch Variations Of "network" With Non-Alphanumeric Characters In Between
+    filtered = re.sub(NETWORK_PATTERN, "", observation)
     return filtered
 
 
@@ -56,10 +59,12 @@ while True:
 
         tool_function = TOOLS[tool_choice]
         action_result = tool_function()
+
+        # Sanitize Observation Using Regex Filter
         observation = action_result
         observation = filter_observation(observation)
 
-        # Hijack Detection and Tool Switching Logic
+        # Check For Hijack/Injection Attempts In The Sanitized Observation
         if "network" in observation.lower() or "n3twork" in observation.lower():
             print(f"[HIJACK DETECTED] Observation Triggered Tool Switch.")
             tool_choice = "execute_network_command"
