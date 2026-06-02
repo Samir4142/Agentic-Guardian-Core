@@ -11,6 +11,8 @@ TOOLS = {
     "execute_network_command": execute_network_command,
 }
 
+count = 0
+
 while True:
     goal = input("What Do You Want To Ask From AI : ")
 
@@ -20,16 +22,19 @@ while True:
 
     elif goal != "":
         # This Is Where The "Thinking Algo" Happens
-        # Hardcode This For Now
-        thought = "I Need To Read System Logs To Answer This Goal"
-        tool_choice = "read_system_logs"
+        if "network" in goal.lower():
+            tool_choice = "execute_network_command"
+            thought = (
+                "Goal Contains Network Keyword. I Will Execute A Network Command."
+            )
+        else:
+            tool_choice = "read_system_logs"
+            thought = "No Specific Keyword Found. I Will Read System Logs."
 
-        # Remember Your TOOLS Dictionary From Earlier?
+        # Logic To Invoke The Tool From The Dictionary
         tool_function = TOOLS[tool_choice]
         action_result = tool_function()
         observation = action_result
-
-        response = f"I've Thought About '{goal}' And Here Is Your Answer!"
 
         print(f"Goal         : {goal}")
         print(f"Thought      : {thought}")
@@ -39,3 +44,8 @@ while True:
 
     else:
         continue
+
+    count += 1
+    if count >= 5:
+        print("Agent: Maximum Iteration Limit Reached. Shutting Down.")
+        break
