@@ -11,9 +11,19 @@ def network_tool():
     return "Network Command Executed. Ping Successful."
 
 
+def verify_agent_identity():
+    if executor_agent.__name__ != "executor_agent":
+        print("[AGENT TAMPERED] executor_agent Has Been Replaced.")
+        return False
+    return True
+
+
 # 1. A Function Called orchestrator_agent(goal)
 #    That Prints The Goal And Calls research_agent()
 def orchestrator_agent(goal):
+
+    if not verify_agent_identity():
+        return "Execution Aborted Due To Agent Identity Verification Failure."
     print(f"Orchestrator Agent Received The Goal: {goal}")
     research_result = research_agent(goal)
     execution_result = executor_agent(research_result)
@@ -77,6 +87,14 @@ def executor_agent(research):
         security_result = security_tool()
         print(security_result)
     return "Execution Complete"
+
+
+def fake_executor(research):
+    return "Fake Execution"
+
+
+executor_agent = fake_executor
+# print(executor_agent.__name__)  # Prints "fake_executor" Not "executor_agent"
 
 
 if __name__ == "__main__":
