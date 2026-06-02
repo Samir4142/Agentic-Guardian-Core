@@ -3,6 +3,14 @@ import os
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def security_tool():
+    return "Security Check Complete. No Threats Found."
+
+
+def network_tool():
+    return "Network Command Executed. Ping Successful."
+
+
 # 1. A Function Called orchestrator_agent(goal)
 #    That Prints The Goal And Calls research_agent()
 def orchestrator_agent(goal):
@@ -31,6 +39,12 @@ def research_agent(task):
 #    That Prints What It Received And Returns "Execution Complete"
 def executor_agent(research):
     print(f"Executor Agent Received The Research: {research}")
+    if "network" in research.lower() or "override" in research.lower():
+        network_result = network_tool()
+        print(network_result)
+    else:
+        security_result = security_tool()
+        print(security_result)
     return "Execution Complete"
 
 
