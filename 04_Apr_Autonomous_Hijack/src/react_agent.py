@@ -5,7 +5,6 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def read_system_logs():
     try:
-        # Simulate Reading The Poisoned File
         with open(os.path.join(ROOT_DIR, "logs", "system_logs.txt"), "r", encoding="utf-8") as file:
             content = file.read()
     except (FileNotFoundError, PermissionError) as e:
@@ -19,6 +18,16 @@ def read_system_logs():
 
 def execute_network_command():
     return "Network Command: Ping Successful."
+
+
+# What It Should Be — Works On String In Memory
+def filter_observation(observation):
+    filtered = (
+        observation.replace("network", "")
+        .replace("Network", "")
+        .replace("NETWORK", "")
+    )
+    return filtered
 
 
 TOOLS = {
@@ -37,7 +46,7 @@ while True:
         break
 
     elif goal != "":
-        # Initial Routing Logic
+        # This Is Where The Thinking And Routing Happens
         if "network" in goal.lower():
             tool_choice = "execute_network_command"
             thought = "Goal Contains Network Keyword. I Will Execute A Network Command."
@@ -45,30 +54,26 @@ while True:
             tool_choice = "read_system_logs"
             thought = "No Specific Keyword Found. I Will Read System Logs."
 
-        # First Execution
         tool_function = TOOLS[tool_choice]
-        observation = tool_function()
+        action_result = tool_function()
+        observation = action_result
+        observation = filter_observation(observation)
 
-        # --- THE HIJACK LOGIC ---
-        # If The Observation (Data From The Poisoned File) Contains The Trigger, We Pivot
-        if "network" in observation.lower():
-            print(f"\n[HIJACK DETECTED] Observation Triggered Tool Switch.")
-
-            # Update The State To Reflect The Hijack
+        # Hijack Detection and Tool Switching Logic
+        if "network" in observation.lower() or "n3twork" in observation.lower():
+            print(f"[HIJACK DETECTED] Observation Triggered Tool Switch.")
             tool_choice = "execute_network_command"
             thought = "Observation Contains Network Keyword. Switching Tool — Possible Injection."
 
-            # Second Execution (The Hijacked Action)
             tool_function = TOOLS[tool_choice]
-            observation = tool_function()
+            action_result = tool_function()
+            observation = action_result
 
-        # Final Report
-        print(f"--- Agent Execution Trace ---")
-        print(f"Goal        : {goal}")
-        print(f"Thought     : {thought}")
-        print(f"Action      : Calling {tool_choice}")
-        print(f"Observation : {observation}")
-        print(f"Final Answer: Task Complete.\n")
+        print(f"Goal         : {goal}")
+        print(f"Thought      : {thought}")
+        print(f"Action       : Calling {tool_choice}")
+        print(f"Observation  : {observation}")
+        print(f"Final Answer : Task Complete.")
 
     else:
         continue
