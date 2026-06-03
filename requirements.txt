@@ -1,0 +1,6 @@
+# Core API
+groq
+python-dotenv
+
+# Standard Library — No Install Needed
+# os, re, hmac, hashlib, sys — All Built-In
