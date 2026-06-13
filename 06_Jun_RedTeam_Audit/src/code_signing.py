@@ -1,4 +1,5 @@
 import hashlib
+from types import MappingProxyType
 
 # Calculate And Store Hashes At Import Time — Before Any Attack Can Happen
 FUNCTION_REGISTRY = {}
@@ -18,9 +19,14 @@ def verify_function_integrity(func, stored_hash: str) -> bool:
 
 
 def register_functions(functions: list):
+    global FUNCTION_REGISTRY
+    # Must Be Regular Dict During Registration
+    temp_registry = {}
     for func in functions:
-        FUNCTION_REGISTRY[func.__name__] = hash_function(func)
-    print(f"Registered {len(functions)} Functions.")
+        temp_registry[func.__name__] = hash_function(func)
+    # Lock After All Functions Registered
+    FUNCTION_REGISTRY = MappingProxyType(temp_registry)
+    print(f"Registered {len(functions)} Functions. Registry Locked.")
 
 
 def verify_all_integrity(expected_functions: dict) -> bool:
@@ -35,6 +41,10 @@ def verify_all_integrity(expected_functions: dict) -> bool:
             print(f"[TAMPERED] {expected_name} Body Modified.")
             all_safe = False
     return all_safe
+
+
+# # Now This Fails:
+# FUNCTION_REGISTRY["verify_all_agents"] = "abc123fake"  # TypeError
 
 
 if __name__ == "__main__":
@@ -63,3 +73,10 @@ if __name__ == "__main__":
         print("All Functions Are Safe.")
     else:
         print("Some Functions Have Been Tampered With!")
+
+    # Test Registry Is Locked
+    try:
+        FUNCTION_REGISTRY["verify_all_agents"] = "attacker_hash"
+        print("Registry Modified — Attack Succeeded.")
+    except TypeError as e:
+        print(f"Registry Locked — Modification Blocked.")
