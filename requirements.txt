@@ -1,4 +1,15 @@
 # Core API
+ollama
+pandas
+colorama
+openpyxl
+langchain
+langchain-community
+chromadb
+sentence-transformers
+unstructured
+langchain-ollama
+docarray
 groq
 python-dotenv
 
